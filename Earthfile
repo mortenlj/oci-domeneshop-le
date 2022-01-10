@@ -6,7 +6,7 @@ ARG EARTHLY_GIT_SHORT_HASH
 
 # Override from command-line on CI
 ARG cache_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME/cache
-ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME/oci-domeneshop-le
+ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 ARG VERSION=$EARTHLY_GIT_SHORT_HASH
 
 WORKDIR /
@@ -31,7 +31,9 @@ docker:
     FROM python:3
     COPY --dir +oci-sdk/ /opt/oci-sdk/
     COPY --dir +certbot/ /opt/certbot/
+    COPY renew-certificates.sh /usr/local/bin/
 
-    ENTRYPOINT ["bash"]
+    CMD ["/usr/local/bin/renew-certificates.sh"]
+
     SAVE IMAGE --push ${main_image}:${VERSION}
     SAVE IMAGE --push ${main_image}:latest
