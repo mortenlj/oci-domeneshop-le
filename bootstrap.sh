@@ -74,7 +74,8 @@ function seal_secret() {
     sleep 2
     curl http://localhost:8080/v1/cert.pem > "${cert_pem}"
     log "kubeseal cert saved to ${cert_pem}"
-    kubectl create secret generic --namespace=default --dry-run=client "--from-file=${config_dir}" oci-sa-domeneshop -oyaml | kubeseal --cert "${cert_pem}" --format yaml > deploy/sealed-secret.yaml
+    echo "---" > deploy/sealed-secret.yaml
+    kubectl create secret generic --namespace=default --dry-run=client "--from-file=${config_dir}" oci-sa-domeneshop -oyaml | kubeseal --cert "${cert_pem}" --format yaml >> deploy/sealed-secret.yaml
     kill ${pf_pid}
 }
 
