@@ -1,3 +1,5 @@
+VERSION 0.6
+
 FROM python:3
 
 # builtins must be declared
@@ -5,7 +7,6 @@ ARG EARTHLY_GIT_PROJECT_NAME
 ARG EARTHLY_GIT_SHORT_HASH
 
 # Override from command-line on CI
-ARG cache_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME/cache
 ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
 ARG VERSION=$EARTHLY_GIT_SHORT_HASH
 
@@ -17,7 +18,7 @@ oci-sdk:
         chmod a+x install.sh && \
         ./install.sh --accept-all-defaults --install-dir /opt/oci-sdk
     SAVE ARTIFACT /opt/oci-sdk/*
-    SAVE IMAGE --push ${cache_image}:oci-sdk
+    SAVE IMAGE --cache-hint
 
 certbot:
     RUN python3 -m venv /opt/certbot/ && \
@@ -25,7 +26,7 @@ certbot:
         /opt/certbot/bin/pip install certbot && \
         /opt/certbot/bin/pip install certbot-dns-domeneshop
     SAVE ARTIFACT /opt/certbot/*
-    SAVE IMAGE --push ${cache_image}:certbot
+    SAVE IMAGE --cache-hint
 
 docker:
     FROM python:3
@@ -42,7 +43,7 @@ manifests:
     FROM dinutac/jinja2docker:latest
     WORKDIR /manifests
     COPY deploy/* /templates
-    RUN --entrypoint -- -DVERSION=${VERSION} -Dmain_image=${main_image} /templates/cronjob.yaml.j2 > ./deploy.yaml
+    RUN --entrypoint -- /templates/cronjob.yaml.j2 > ./deploy.yaml
     RUN cat /templates/*.yaml >> ./deploy.yaml
     SAVE ARTIFACT ./deploy.yaml AS LOCAL deploy.yaml
 

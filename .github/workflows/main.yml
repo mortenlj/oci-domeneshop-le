@@ -4,7 +4,7 @@ on: [ push ]
 
 env:
   main_image: ghcr.io/${{ github.repository }}
-  cache_image: ghcr.io/${{ github.repository }}/cache
+  cache_image: ghcr.io/${{ github.repository }}/cache:cache
 
 jobs:
   setup:
@@ -17,7 +17,6 @@ jobs:
         run: |
           export version="$(date +%Y%m%d%H%M%S)-$(git describe --always --dirty --exclude '*')"
           echo "::set-output name=VERSION::${version}"
-          echo "::set-output name=MAIN_IMAGE::${main_image}:${version}"
     outputs:
       VERSION: "${{ steps.constants.outputs.VERSION }}"
   build:
@@ -38,8 +37,7 @@ jobs:
         env:
           EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
         run: |
-          ./earthlyw config global.local_registry_host 'tcp://127.0.0.1:8371'
-          ./earthlyw --ci --output --build-arg main_image --build-arg cache_image --build-arg VERSION +deploy
+          ./earthlyw --ci --output "--remote-cache=${cache_image}" +deploy "--main_image=${main_image}" "--VERSION=${VERSION}"
       - name: Create release for deploy
         if: github.ref == 'refs/heads/main'
         id: create_release
