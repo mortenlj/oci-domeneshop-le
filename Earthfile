@@ -18,7 +18,7 @@ oci-sdk:
         chmod a+x install.sh && \
         ./install.sh --accept-all-defaults --install-dir /opt/oci-sdk
     SAVE ARTIFACT /opt/oci-sdk/*
-    SAVE IMAGE --cache-hint
+    SAVE IMAGE --cache-hint ${main_image}/cache:oci-sdk
 
 certbot:
     RUN python3 -m venv /opt/certbot/ && \
@@ -26,7 +26,7 @@ certbot:
         /opt/certbot/bin/pip install certbot && \
         /opt/certbot/bin/pip install certbot-dns-domeneshop
     SAVE ARTIFACT /opt/certbot/*
-    SAVE IMAGE --cache-hint
+    SAVE IMAGE --cache-hint ${main_image}/cache:certbot
 
 docker:
     FROM python:3
