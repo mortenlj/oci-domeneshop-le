@@ -39,7 +39,7 @@ jobs:
           EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
         run: |
           ./earthlyw config global.local_registry_host 'tcp://127.0.0.1:8371'
-          ./earthlyw --ci --build-arg main_image --build-arg cache_image --build-arg VERSION +deploy
+          ./earthlyw --ci --output --build-arg main_image --build-arg cache_image --build-arg VERSION +deploy
       - name: Create release for deploy
         if: github.ref == 'refs/heads/main'
         id: create_release
