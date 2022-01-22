@@ -37,3 +37,15 @@ docker:
 
     SAVE IMAGE --push ${main_image}:${VERSION}
     SAVE IMAGE --push ${main_image}:latest
+
+manifests:
+    FROM dinutac/jinja2docker:latest
+    WORKDIR /manifests
+    COPY deploy/* /templates
+    RUN --entrypoint -- -DVERSION=${VERSION} -Dmain_image=${main_image} /templates/cronjob.yaml.j2 > ./deploy.yaml
+    RUN cat /templates/*.yaml >> ./deploy.yaml
+    SAVE ARTIFACT ./deploy.yaml AS LOCAL deploy.yaml
+
+deploy:
+    BUILD +docker
+    BUILD +manifests

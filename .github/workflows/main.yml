@@ -39,4 +39,21 @@ jobs:
           EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
         run: |
           ./earthlyw config global.local_registry_host 'tcp://127.0.0.1:8371'
-          ./earthlyw --ci --build-arg main_image --build-arg cache_image --build-arg VERSION +docker
+          ./earthlyw --ci --build-arg main_image --build-arg cache_image --build-arg VERSION +deploy
+      - name: Create release for deploy
+        if: github.ref == 'refs/heads/main'
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "${{ needs.setup.outputs.VERSION }}"
+          release_name: "Release ${{ needs.setup.outputs.VERSION }}"
+          draft: false
+          prerelease: false
+      - name: upload deploy.yaml to release
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./deploy.yaml
+          asset_name: deploy.yaml
+          asset_content_type: text/yaml

@@ -1,0 +1,59 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: oci-domeneshop-le
+  name: oci-domeneshop-le
+  namespace: default
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: oci-domeneshop-le
+      name: oci-domeneshop-le
+      namespace: default
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: oci-domeneshop-le
+          name: oci-domeneshop-le
+          namespace: default
+        spec:
+          containers:
+          - env:
+            - name: OCI_CLI_CONFIG_FILE
+              value: /var/run/secrets/ibidem.no/oci-sa/config
+            image: "{{ environ('main_image') }}:{{ environ('VERSION') }}"
+            imagePullPolicy: IfNotPresent
+            name: oci-domeneshop-le
+            volumeMounts:
+            - mountPath: /var/run/secrets/ibidem.no/oci-sa
+              name: oci-sa-domeneshop
+              readOnly: true
+            - mountPath: /tmp
+              name: writable-tmp
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          volumes:
+          - name: oci-sa-domeneshop
+            secret:
+              defaultMode: 400
+              items:
+              - key: config
+                path: config
+              - key: private_key.pem
+                path: private_key.pem
+              - key: public_key.pem
+                path: public_key.pem
+              secretName: oci-sa-domeneshop
+          - emptyDir: {}
+            name: writable-tmp
+  schedule: 13 12 * * 6
+  successfulJobsHistoryLimit: 3
+  suspend: false
