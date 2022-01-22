@@ -37,6 +37,7 @@ jobs:
         env:
           EARTHLY_PUSH: "${{ github.ref == 'refs/heads/main' }}"
         run: |
+          ./earthlyw --version
           ./earthlyw --ci --output "--remote-cache=${cache_image}" +deploy "--main_image=${main_image}" "--VERSION=${VERSION}"
       - name: Create release for deploy
         if: github.ref == 'refs/heads/main'
