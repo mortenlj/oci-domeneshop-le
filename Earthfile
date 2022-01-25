@@ -44,7 +44,7 @@ manifests:
     WORKDIR /manifests
     COPY deploy/* /templates
     RUN --entrypoint -- /templates/cronjob.yaml.j2 > ./deploy.yaml
-    RUN --push cat /templates/*.yaml >> ./deploy.yaml
+    RUN cat /templates/*.yaml >> ./deploy.yaml
     SAVE ARTIFACT ./deploy.yaml AS LOCAL deploy.yaml
 
 deploy:
