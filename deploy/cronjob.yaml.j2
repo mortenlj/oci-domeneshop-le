@@ -2,24 +2,24 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   labels:
-    app: le-oci-domeneshop
-  name: le-oci-domeneshop
+    app: oci-domeneshop-le
+  name: oci-domeneshop-le
   namespace: default
 spec:
   concurrencyPolicy: Replace
   jobTemplate:
     metadata:
       labels:
-        app: le-oci-domeneshop
-      name: le-oci-domeneshop
+        app: oci-domeneshop-le
+      name: oci-domeneshop-le
       namespace: default
     spec:
       template:
         metadata:
           creationTimestamp: null
           labels:
-            app: le-oci-domeneshop
-          name: le-oci-domeneshop
+            app: oci-domeneshop-le
+          name: oci-domeneshop-le
           namespace: default
         spec:
           containers:
@@ -28,7 +28,7 @@ spec:
               value: /var/run/secrets/ibidem.no/oci-sa/config
             image: "{{ environ('main_image') }}:{{ environ('VERSION') }}"
             imagePullPolicy: IfNotPresent
-            name: le-oci-domeneshop
+            name: oci-domeneshop-le
             volumeMounts:
             - mountPath: /var/run/secrets/ibidem.no/oci-sa
               name: oci-sa-domeneshop
