@@ -48,5 +48,5 @@ manifests:
     SAVE ARTIFACT ./deploy.yaml AS LOCAL deploy.yaml
 
 deploy:
-    BUILD +docker
+    BUILD --platform=linux/amd64 --platform=linux/arm64 +docker
     BUILD +manifests
