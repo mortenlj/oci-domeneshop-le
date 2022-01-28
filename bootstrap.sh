@@ -56,6 +56,7 @@ function create_service_account() {
 
   log "Creating API config file in ${config_file}"
   cat > ${config_file} <<EOF
+[DEFAULT]
 user=${user_id}
 fingerprint=${fingerprint}
 key_file=private_key.pem
