@@ -41,13 +41,6 @@ spec:
           - name: oci-sa-domeneshop
             secret:
               defaultMode: 400
-              items:
-              - key: config
-                path: config
-              - key: private_key.pem
-                path: private_key.pem
-              - key: public_key.pem
-                path: public_key.pem
               secretName: oci-sa-domeneshop
           - emptyDir: {}
             name: writable-tmp
