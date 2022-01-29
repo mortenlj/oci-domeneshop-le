@@ -39,6 +39,18 @@ docker:
     SAVE IMAGE --push ${main_image}:${VERSION}
     SAVE IMAGE --push ${main_image}:latest
 
+test:
+    FROM earthly/dind:alpine
+    WORKDIR /test
+    COPY secret_contents/ /test/secret_contents
+    WITH DOCKER --load test-image:latest=+docker
+        RUN docker run \
+            --env OCI_CLI_CONFIG_FILE=/var/run/secrets/ibidem.no/oci-sa/config \
+            --mount type=bind,src=/test/secret_contents,dst=/var/run/secrets/ibidem.no/oci-sa,readonly \
+            --mount type=tmpfs,dst=/tmp \
+            test-image:latest
+    END
+
 manifests:
     FROM dinutac/jinja2docker:latest
     WORKDIR /manifests
