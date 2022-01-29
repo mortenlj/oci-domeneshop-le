@@ -14,14 +14,20 @@ set -o nounset   # abort on unbound variable
 # The sealed secret and a cronjob manifest should be checked into git
 # The manifest can be deployed either directly with kubectl apply, or using manifests on k3s-server
 
-BUCKET_NAME="le-certificates"
+BUCKET_NAME=le-certificates
+USER_NAME=oci-domeneshop-le
+GROUP_NAME=le-certificates-access
+POLCIY_NAME=le-certificates-access
+
 LOG_FORMAT="${LOG_FORMAT:-plain}"
+MOUNT_PATH="/var/run/secrets/ibidem.no/oci-sa"
 
 tenancy=
 # shellcheck disable=SC1090
 source <(grep tenancy < ~/.oci/config)
 
 COMPARTMENT_ID="${COMPARTMENT_ID:-${tenancy}}"
+
 
 function log() {
   now=$(date -Iseconds)
@@ -39,9 +45,11 @@ function create_bucket() {
 
 function create_service_account() {
   log "Creating service account"
-  user_id=$(oci iam user create --name oci-domeneshop-le --description "SA for oci-domeneshop-le cronjob" --query data.id --raw-output)
+  user_id=$(oci iam user create --name "${USER_NAME}" --description "SA for oci-domeneshop-le cronjob" --query data.id --raw-output)
 
-  config_dir=$(mktemp -d)
+  config_dir=./secret_contents
+  rm -rf ${config_dir}
+  mkdir -p ${config_dir}
   config_file="${config_dir}/config"
   private_key_file="${config_dir}/private_key.pem"
   public_key_file="${config_dir}/public_key.pem"
@@ -59,11 +67,27 @@ function create_service_account() {
 [DEFAULT]
 user=${user_id}
 fingerprint=${fingerprint}
-key_file=private_key.pem
+key_file=${MOUNT_PATH}/private_key.pem
 tenancy=${tenancy}
 region=eu-zurich-1
 EOF
+
+  chmod u=rw,g=,o= ${config_dir}/*
+
+  export user_id
   export config_dir
+}
+
+function grant_access() {
+  log "Creating user group"
+  group_id=$(oci iam group create --name "${GROUP_NAME}" --description "Read/write access to LE certificates" --query data.id --raw-output)
+
+  log "Adding ${USER_NAME} to group ${GROUP_NAME}"
+  oci iam group add-user --user-id=${user_id} --group-id=${group_id}
+
+  log "Creating access policy for ${GROUP_NAME}"
+  oci iam policy create --compartment-id "${COMPARTMENT_ID}" --name "${POLCIY_NAME}" --description "Read/write access to LE certificates" \
+    --statements "[\"Allow group ${GROUP_NAME} to read buckets in tenancy\", \"Allow group ${GROUP_NAME} to manage objects in tenancy where any {request.permission='OBJECT_CREATE', request.permission='OBJECT_INSPECT', request.permission='OBJECT_READ', request.permission='OBJECT_OVERWRITE'}\"]"
 }
 
 function seal_secret() {
@@ -84,6 +108,7 @@ log "Bootstrapping oci-domeneshop-le"
 
 create_bucket
 create_service_account
+grant_access
 seal_secret
 
 log "Done"
