@@ -33,6 +33,9 @@ spec:
             - mountPath: /var/run/secrets/ibidem.no/oci-sa
               name: oci-sa-domeneshop
               readOnly: true
+            - mountPath: /var/run/secrets/ibidem.no/domeneshop
+              name: domeneshop-credentials
+              readOnly: true
             - mountPath: /tmp
               name: writable-tmp
           dnsPolicy: ClusterFirst
@@ -40,8 +43,12 @@ spec:
           volumes:
           - name: oci-sa-domeneshop
             secret:
-              defaultMode: 400
+              defaultMode: 0600
               secretName: oci-sa-domeneshop
+          - name: domeneshop-credentials
+            secret:
+              defaultMode: 0600
+              secretName: domeneshop
           - emptyDir: {}
             name: writable-tmp
   schedule: 13 12 * * *

@@ -32,9 +32,12 @@ docker:
     FROM python:3
     COPY --dir +oci-sdk/ /opt/oci-sdk/
     COPY --dir +certbot/ /opt/certbot/
-    COPY renew-certificates.sh /usr/local/bin/
 
-    CMD ["/usr/local/bin/renew-certificates.sh"]
+    WORKDIR /app
+    COPY renew-certificates.sh .
+    COPY certbot.ini .
+
+    CMD ["/app/renew-certificates.sh"]
 
     SAVE IMAGE --push ${main_image}:${VERSION}
     SAVE IMAGE --push ${main_image}:latest
@@ -46,7 +49,8 @@ test:
     WITH DOCKER --load test-image:latest=+docker
         RUN docker run \
             --env OCI_CLI_CONFIG_FILE=/var/run/secrets/ibidem.no/oci-sa/config \
-            --mount type=bind,src=/test/secret_contents,dst=/var/run/secrets/ibidem.no/oci-sa,readonly \
+            --mount type=bind,src=/test/secret_contents/oci-sa,dst=/var/run/secrets/ibidem.no/oci-sa,readonly \
+            --mount type=bind,src=/test/secret_contents/domeneshop,dst=/var/run/secrets/ibidem.no/domeneshop,readonly \
             --mount type=tmpfs,dst=/tmp \
             test-image:latest
     END

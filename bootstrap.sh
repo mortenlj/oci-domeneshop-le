@@ -47,7 +47,7 @@ function create_service_account() {
   log "Creating service account"
   user_id=$(oci iam user create --name "${USER_NAME}" --description "SA for oci-domeneshop-le cronjob" --query data.id --raw-output)
 
-  config_dir=./secret_contents
+  config_dir=./secret_contents/oci-sa
   rm -rf ${config_dir}
   mkdir -p ${config_dir}
   config_file="${config_dir}/config"
