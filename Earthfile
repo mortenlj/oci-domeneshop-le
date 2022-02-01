@@ -2,14 +2,6 @@ VERSION 0.6
 
 FROM python:3
 
-# builtins must be declared
-ARG EARTHLY_GIT_PROJECT_NAME
-ARG EARTHLY_GIT_SHORT_HASH
-
-# Override from command-line on CI
-ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
-ARG VERSION=$EARTHLY_GIT_SHORT_HASH
-
 WORKDIR /
 
 oci-sdk:
@@ -38,6 +30,14 @@ docker:
     COPY certbot.ini .
 
     CMD ["/app/renew-certificates.sh"]
+
+    # builtins must be declared
+    ARG EARTHLY_GIT_PROJECT_NAME
+    ARG EARTHLY_GIT_SHORT_HASH
+
+    # Override from command-line on CI
+    ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
+    ARG VERSION=$EARTHLY_GIT_SHORT_HASH
 
     SAVE IMAGE --push ${main_image}:${VERSION}
     SAVE IMAGE --push ${main_image}:latest
