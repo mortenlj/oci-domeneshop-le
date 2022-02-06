@@ -13,6 +13,8 @@ set -o nounset   # abort on unbound variable
 # * Bulk upload certificates to OCI bucket
 
 BUCKET_NAME="le-certificates"
+CERT_PATH="/etc/letsencrypt"
+DOMAINS="*.oci.ibidem.no,*.ibidem.no,ibidem.no"
 LOG_FORMAT="${LOG_FORMAT:-plain}"
 
 OCI_CLI_CONFIG_FILE="${OCI_CLI_CONFIG_FILE:-~/.oci/config}"
@@ -36,23 +38,19 @@ function log() {
 
 function download_certificates() {
   log "Attempting download of existing certificates"
-  cert_path=$(mktemp --directory --suffix=-certificates)
-  export cert_path
-  if oci os object bulk-download --bucket-name "${BUCKET_NAME}" --download-dir "${cert_path}"; then
-    return 1
-  else
-    return 0
-  fi
+  oci os object bulk-download --bucket-name "${BUCKET_NAME}" --download-dir "${CERT_PATH}"
 }
 
+# TODO: Use `--deploy-hook` to launch secondary script to install certificates on LB
+
 function create_certificates() {
-  log "TODO: Creating certificates"
-  echo "created dummy certificate" > "${cert_path}/dummy.txt"
+  log "Creating certificates"
+  certbot certonly --config ./certbot.ini --domains "${DOMAINS}"
 }
 
 function renew_certificates() {
-  log "TODO: Renewing certificates"
-  echo "renewed dummy certificate at $(date -Iseconds)" > "${cert_path}/dummy.txt"
+  log "Renewing certificates"
+  certbot renew --config ./certbot.ini
 }
 
 function configure_load_balancer() {
@@ -61,16 +59,18 @@ function configure_load_balancer() {
 
 function upload_certificates() {
   log "Uploading certificates"
-  oci os object bulk-upload --overwrite --bucket-name "${BUCKET_NAME}" --src-dir "${cert_path}"
+  oci os object bulk-upload --overwrite --bucket-name "${BUCKET_NAME}" --src-dir "${CERT_PATH}"
 }
 
 
 log "Renewing certificates"
 
-if download_certificates; then
-  create_certificates
-else
+download_certificates
+
+if [[ -r "${CERT_PATH}/renewal/ibidem.no.conf" ]]; then
   renew_certificates
+else
+  create_certificates
 fi
 
 configure_load_balancer
