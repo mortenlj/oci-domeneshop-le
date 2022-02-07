@@ -59,6 +59,8 @@ manifests:
     FROM dinutac/jinja2docker:latest
     WORKDIR /manifests
     COPY deploy/* /templates
+    ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
+    ARG VERSION=$EARTHLY_GIT_SHORT_HASH
     RUN --entrypoint -- /templates/cronjob.yaml.j2 > ./deploy.yaml
     RUN cat /templates/*.yaml >> ./deploy.yaml
     SAVE ARTIFACT ./deploy.yaml AS LOCAL deploy.yaml
