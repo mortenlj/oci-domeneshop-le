@@ -9,6 +9,9 @@
 #
 ###################################################
 
+set -o errexit   # abort on nonzero exitstatus
+set -o nounset   # abort on unbound variable
+
 ####################################
 #                                  #
 #       Variable definition        #
@@ -31,7 +34,7 @@ Port=443
 #
 ListenerName=agents-https
 BackendName=agents
-certificate_path=/etc/letsencrypt/live/ibidem.no
+certificate_path="${RENEWED_LINEAGE}"
 
 ####################################
 # Find LB OCID                     #

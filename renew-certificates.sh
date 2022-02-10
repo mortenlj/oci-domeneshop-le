@@ -5,7 +5,8 @@ set -o nounset   # abort on unbound variable
 
 BUCKET_NAME="le-certificates"
 CERT_PATH="/etc/letsencrypt"
-DOMAINS="ibidem.no,*.ibidem.no,*.oci.ibidem.no"
+MAIN_DOMAIN=ibidem.no
+DOMAINS="${MAIN_DOMAIN},*.${MAIN_DOMAIN},*.oci.${MAIN_DOMAIN}"
 LOG_FORMAT="${LOG_FORMAT:-plain}"
 
 OCI_CLI_CONFIG_FILE="${OCI_CLI_CONFIG_FILE:-~/.oci/config}"
@@ -29,12 +30,13 @@ function download_certificates() {
 
 function create_certificates() {
   log "Creating certificates"
-  certbot certonly --config ./certbot.ini --domains "${DOMAINS}" --deploy-hook /app/update_certificate_in_LB.sh
+  certbot certonly --config ./certbot.ini --domains "${DOMAINS}"
+  RENEWED_LINEAGE="/etc/letsencrypt/live/${MAIN_DOMAIN}" /app/update_certificate_in_LB.sh
 }
 
 function renew_certificates() {
   log "Renewing certificates"
-  certbot renew --config ./certbot.ini
+  certbot renew --config ./certbot.ini --deploy-hook /app/update_certificate_in_LB.sh
 }
 
 function configure_load_balancer() {
