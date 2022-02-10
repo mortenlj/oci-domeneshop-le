@@ -22,11 +22,13 @@ certbot:
 
 docker:
     FROM python:3
+    RUN apt-get --quiet --yes update && apt-get --quiet --yes install jq
     COPY --dir +oci-sdk/ /opt/oci-sdk/
     COPY --dir +certbot/ /opt/certbot/
 
     WORKDIR /app
     COPY renew-certificates.sh .
+    COPY update_certificate_in_LB.sh .
     COPY certbot.ini .
 
     CMD ["/app/renew-certificates.sh"]
