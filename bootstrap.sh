@@ -16,8 +16,9 @@ set -o nounset   # abort on unbound variable
 
 BUCKET_NAME=le-certificates
 USER_NAME=oci-domeneshop-le
-GROUP_NAME=le-certificates-access
-POLCIY_NAME=le-certificates-access
+GROUP_NAME=oci-domeneshop-le
+BUCKET_POLICY_NAME=le-certificates-access
+LB_POLICY_NAME=le-lb-access
 
 LOG_FORMAT="${LOG_FORMAT:-plain}"
 MOUNT_PATH="/var/run/secrets/ibidem.no/oci-sa"
@@ -85,9 +86,13 @@ function grant_access() {
   log "Adding ${USER_NAME} to group ${GROUP_NAME}"
   oci iam group add-user --user-id=${user_id} --group-id=${group_id}
 
-  log "Creating access policy for ${GROUP_NAME}"
-  oci iam policy create --compartment-id "${COMPARTMENT_ID}" --name "${POLCIY_NAME}" --description "Read/write access to LE certificates" \
+  log "Creating ${BUCKET_POLICY_NAME} policy for ${GROUP_NAME}"
+  oci iam policy create --compartment-id "${COMPARTMENT_ID}" --name "${BUCKET_POLICY_NAME}" --description "Read/write access to LE certificates" \
     --statements "[\"Allow group ${GROUP_NAME} to read buckets in tenancy\", \"Allow group ${GROUP_NAME} to manage objects in tenancy where any {request.permission='OBJECT_CREATE', request.permission='OBJECT_INSPECT', request.permission='OBJECT_READ', request.permission='OBJECT_OVERWRITE'}\"]"
+
+  log "Creating ${LB_POLICY_NAME} policy for ${GROUP_NAME}"
+  oci iam policy create --compartment-id "${COMPARTMENT_ID}" --name "${LB_POLICY_NAME}" --description "Read/write access to flex-lb" \
+    --statements "[\"Allow group ${GROUP_NAME} to use load-balancers in tenancy\"]"
 }
 
 function seal_secret() {
