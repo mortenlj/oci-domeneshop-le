@@ -49,11 +49,6 @@ function upload_certificates() {
 
 log "Start certificate update job"
 
-log "DEBUG: Permissions on mounted files:"
-ls -la /var/run/secrets/ibidem.no/oci-sa/
-ls -la /var/run/secrets/ibidem.no/domeneshop/
-log "DEBUG: -----------------------------"
-
 download_certificates
 
 if [[ -r "${CERT_PATH}/renewal/ibidem.no.conf" ]]; then

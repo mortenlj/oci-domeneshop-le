@@ -26,6 +26,8 @@ spec:
           - env:
             - name: OCI_CLI_CONFIG_FILE
               value: /var/run/secrets/ibidem.no/oci-sa/config
+            - name: OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING
+              value: "True"
             image: "{{ environ('main_image') }}:{{ environ('VERSION') }}"
             imagePullPolicy: IfNotPresent
             name: oci-domeneshop-le
