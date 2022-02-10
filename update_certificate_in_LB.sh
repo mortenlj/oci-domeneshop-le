@@ -29,7 +29,7 @@ Port=443
 #
 # Only change the variables below
 #
-ListenerName=HTTPS-Listener
+ListenerName=agents-https
 BackendName=agents
 certificate_path=/etc/letsencrypt/live/ibidem.no
 
