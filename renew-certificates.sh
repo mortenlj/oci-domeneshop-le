@@ -39,13 +39,9 @@ function renew_certificates() {
   certbot renew --config ./certbot.ini --deploy-hook /app/update_certificate_in_LB.sh
 }
 
-function configure_load_balancer() {
-  log "TODO: Configuring load balancer"
-}
-
 function upload_certificates() {
   log "Uploading certificates"
-  oci os object bulk-upload --overwrite --bucket-name "${BUCKET_NAME}" --src-dir "${CERT_PATH}"
+  oci os object bulk-upload --no-follow-symlinks --overwrite --bucket-name "${BUCKET_NAME}" --src-dir "${CERT_PATH}"
 }
 
 
@@ -58,8 +54,6 @@ if [[ -r "${CERT_PATH}/renewal/ibidem.no.conf" ]]; then
 else
   create_certificates
 fi
-
-configure_load_balancer
 
 upload_certificates
 
