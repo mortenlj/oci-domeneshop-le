@@ -1,10 +1,8 @@
 VERSION 0.6
 
-FROM python:3
-
-WORKDIR /
-
 oci-sdk:
+    FROM python:3
+    WORKDIR /tmp
     RUN wget https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh
     RUN mkdir -p /opt/oci-sdk && \
         chmod a+x install.sh && \
@@ -13,6 +11,8 @@ oci-sdk:
     SAVE IMAGE --cache-hint
 
 certbot:
+    FROM python:3
+    WORKDIR /tmp
     RUN python3 -m venv /opt/certbot/ && \
         /opt/certbot/bin/pip install --upgrade pip && \
         /opt/certbot/bin/pip install certbot && \
