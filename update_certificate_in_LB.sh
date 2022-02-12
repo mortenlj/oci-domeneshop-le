@@ -29,6 +29,7 @@ now=$(date "+%Y%m%d_%H%M")
 CertificateName=Certificate-$now
 Protocol=HTTP
 Port=443
+
 #
 # Only change the variables below
 #
@@ -49,16 +50,11 @@ LB_OCID=$(oci lb load-balancer list --compartment-id "${COMPARTMENT_ID}" | jq -r
 echo "Creating Certificate $CertificateName in Listener $ListenerName"
 
 oci lb certificate create \
+--wait-for-state SUCCEEDED --wait-for-state FAILED --wait-interval-seconds 5 \
 --certificate-name $CertificateName \
 --load-balancer-id $LB_OCID \
 --private-key-file "$certificate_path/privkey.pem" \
 --public-certificate-file "$certificate_path/fullchain.pem"
-
-#
-# Give it 10 seconds for the certificate to be available
-#
-echo "-- Waiting 10 seconds for certificate to be available on OCI"
-sleep 10
 
 ####################################
 #  Update certificate on Listener  #
@@ -66,10 +62,12 @@ sleep 10
 echo "Configuring Listener $ListenerName with certificate $CertificateName"
 
 oci lb listener update \
+--wait-for-state SUCCEEDED --wait-for-state FAILED --wait-interval-seconds 5 \
 --default-backend-set-name $BackendName \
 --listener-name $ListenerName \
 --load-balancer-id $LB_OCID \
 --port $Port \
 --protocol $Protocol \
 --ssl-certificate-name $CertificateName \
+--cipher-suite-name oci-modern-ssl-cipher-suite-v1 \
 --force
