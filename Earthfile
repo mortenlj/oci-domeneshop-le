@@ -41,8 +41,7 @@ docker:
     ARG main_image=ghcr.io/$EARTHLY_GIT_PROJECT_NAME
     ARG VERSION=$EARTHLY_GIT_SHORT_HASH
 
-    SAVE IMAGE --push ${main_image}:${VERSION}
-    SAVE IMAGE --push ${main_image}:latest
+    SAVE IMAGE --push ${main_image}:${VERSION} ${main_image}:latest
 
 test:
     FROM earthly/dind:alpine
