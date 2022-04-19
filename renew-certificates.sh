@@ -27,7 +27,8 @@ function log() {
 function download_certificates() {
   log "Attempting download of existing certificates"
   target_file=$(mktemp -t certificates-XXXXXXX.tar.bz2)
-  if oci os object get --bucket-name "${BUCKET_NAME}" --name "${TARBALL_NAME}" --file "${target_file}"; then
+  if [[ $(oci os object list --bucket-name "${BUCKET_NAME}" --query "data[?name=='${TARBALL_NAME}'].name | [0]" --raw-output) == "${TARBALL_NAME}" ]]; then
+    oci os object get --bucket-name "${BUCKET_NAME}" --name "${TARBALL_NAME}" --file "${target_file}"
     log "Downloaded existing tarball, unpacking"
     tar xjvf "${target_file}" -C /
   fi
