@@ -86,7 +86,7 @@ jobs:
           sudo zerotier-cli listnetworks
           ping -c 5 k3s.oci.zt.ibidem.no
           echo "::endgroup::"
-          kubectl apply --namespace=default --context=showrunner-k3s-oci --filename=deploy.yaml --selector=app=showrunner --prune=true --wait=true --timeout=60s
+          kubectl apply --namespace=default --context=k3s-zt-oci --filename=deploy.yaml --selector=app=oci-domeneshop-le --prune=true --wait=true --timeout=60s
       - name: Leave ZeroTier network
         if: always()
         uses: mortenlj/zerotier-actions/leave-zt@main
