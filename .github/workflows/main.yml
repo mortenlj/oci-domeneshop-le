@@ -46,7 +46,7 @@ jobs:
           ./earthlyw --version
           ./earthlyw --ci --output "--remote-cache=${cache_image}" +deploy "--main_image=${main_image}" "--VERSION=${VERSION}"
       - name: Save manifests for later deploy
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: manifests
           path: deploy.yaml
